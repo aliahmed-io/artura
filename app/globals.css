@@ -1,26 +1,268 @@
 @import "tailwindcss";
 
+/* ============================================
+   ARTURA — Premium Art E-Commerce
+   Design System & Global Styles
+   ============================================ */
+
+/* Google Fonts - Imported in layout.tsx */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors - Vibrant Starry Night Theme */
+  --color-night-deep: #1e3a8a;
+  /* Rich Ultramarine */
+  --color-night-blue: #3b82f6;
+  /* Electric Blue */
+  --color-starlight: #fef08a;
+  /* Bright Yellow */
+  --color-moon-gold: #fbbf24;
+  /* Amber Gold */
+  --color-white: #ffffff;
+  --color-white-soft: rgba(255, 255, 255, 0.95);
+
+  /* Parallax Motion Tokens */
+  --parallax-max-offset: 30px;
+  --parallax-lerp-factor: 0.08;
+  --parallax-idle-amplitude: 1px;
+  --parallax-idle-duration: 10s;
+
+  /* Typography */
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Easing */
+  --ease-out-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Spacing */
+  --hero-height: 100vh;
+  --hero-height-mobile: 100svh;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-night-deep);
+  --color-foreground: var(--color-white);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   Base Styles
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--color-night-deep);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Parallax Hero Styles
+   ============================================ */
+
+.parallax-hero {
+  position: relative;
+  width: 100%;
+  height: var(--hero-height);
+  overflow: hidden;
+  background: var(--color-night-deep);
+  cursor: default;
+}
+
+.parallax-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parallax-layer {
+  position: absolute;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: none;
+}
+
+.parallax-layer img {
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Base layer - largest, covers viewport */
+.parallax-layer--base {
+  width: 120%;
+  height: 120%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.parallax-layer--base img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ============================================
+   Idle Breathing Animation
+   ============================================ */
+
+@keyframes idle-breathe {
+
+  0%,
+  100% {
+    transform: translate(calc(var(--offset-x, 0px) + 0px),
+        calc(var(--offset-y, 0px) + 0px));
+  }
+
+  25% {
+    transform: translate(calc(var(--offset-x, 0px) + var(--breathe-x, 0.5px)),
+        calc(var(--offset-y, 0px) + var(--breathe-y, 0.3px)));
+  }
+
+  50% {
+    transform: translate(calc(var(--offset-x, 0px) + 0px),
+        calc(var(--offset-y, 0px) + var(--breathe-y, 0.5px)));
+  }
+
+  75% {
+    transform: translate(calc(var(--offset-x, 0px) - var(--breathe-x, 0.5px)),
+        calc(var(--offset-y, 0px) + 0px));
+  }
+}
+
+.parallax-layer--breathing {
+  animation: idle-breathe var(--parallax-idle-duration) ease-in-out infinite;
+}
+
+/* ============================================
+   Hero Overlay & Typography
+   ============================================ */
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4rem;
+  pointer-events: none;
+  background: linear-gradient(to top,
+      rgba(11, 16, 38, 0.6) 0%,
+      rgba(11, 16, 38, 0.2) 30%,
+      transparent 60%);
+}
+
+.hero-content {
+  max-width: 600px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 1.2s var(--ease-out-expo) 0.5s forwards;
+}
+
+.hero-logo {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  margin: 0 0 0.5rem 0;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  color: var(--color-white-soft);
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* ============================================
+   Fade In Animation
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   Loading Overlay
+   ============================================ */
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--color-night-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.8s var(--ease-out-smooth);
+  pointer-events: none;
+}
+
+.loading-overlay--hidden {
+  opacity: 0;
+}
+
+.loading-text {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  color: var(--color-white-soft);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
