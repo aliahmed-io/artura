@@ -31,17 +31,21 @@ export default function OurStory() {
                     <div className="h-px w-32 bg-neutral-900/20" />
                 </motion.div>
 
-                {/* Illustration Placeholder */}
+                {/* Van Gogh Portrait */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative aspect-4/3 bg-[#E6E2D6] p-4 shadow-xl rotate-2"
+                    className="relative aspect-[4/5] bg-[#E6E2D6] p-4 shadow-xl rotate-2"
                 >
                     <div className="absolute inset-0 border border-black/5 m-4" />
-                    <div className="h-full w-full flex items-center justify-center border border-black/10 bg-[#EZE8DE]">
-                        <span className="font-serif italic text-neutral-400">Van Gogh Sketch Placeholder</span>
+                    <div className="h-full w-full overflow-hidden border border-black/10">
+                        <img
+                            src="/images/vangogh-portrait.png"
+                            alt="Van Gogh Self Portrait Sketch"
+                            className="w-full h-full object-cover"
+                        />
                     </div>
                     {/* Decorative Elements */}
                     <div className="absolute -top-4 -right-4 w-24 h-24 bg-amber-900/10 rounded-full blur-2xl" />

@@ -1,90 +1,100 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { useScroll, useMotionValueEvent } from "framer-motion";
+
+const TOTAL_FRAMES = 240;
+const getFramePath = (frame: number) =>
+    `/scroll sequence/ezgif-frame-${String(frame).padStart(3, '0')}.jpg`;
 
 export default function ImageSequence() {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const imagesRef = useRef<HTMLImageElement[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadProgress, setLoadProgress] = useState(0);
+    const currentFrameRef = useRef(1);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
 
-    // Placeholder Frame Generation
-    // In a real app, you would preload images here
+    // Preload all images
     useEffect(() => {
+        let loadedCount = 0;
+        const images: HTMLImageElement[] = [];
+
+        for (let i = 1; i <= TOTAL_FRAMES; i++) {
+            const img = new Image();
+            img.src = getFramePath(i);
+            img.onload = () => {
+                loadedCount++;
+                setLoadProgress(Math.floor((loadedCount / TOTAL_FRAMES) * 100));
+                if (loadedCount === TOTAL_FRAMES) {
+                    setIsLoading(false);
+                    // Draw first frame
+                    drawFrame(1);
+                }
+            };
+            images[i] = img;
+        }
+        imagesRef.current = images;
+    }, []);
+
+    const drawFrame = useCallback((frameIndex: number) => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const ctx = canvas?.getContext("2d");
+        const img = imagesRef.current[frameIndex];
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!canvas || !ctx || !img) return;
 
-        // Set canvas size (pseudo-high-res)
-        canvas.width = 1920;
-        canvas.height = 1080;
+        // Set canvas size to match image (only once)
+        if (canvas.width !== img.width || canvas.height !== img.height) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+        }
 
-        const render = (progress: number) => {
-            // Clear
-            ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        currentFrameRef.current = frameIndex;
+    }, []);
 
-            // Draw Placeholder Visuals based on scroll
-            const frameIndex = Math.floor(progress * 100);
+    // Update frame on scroll
+    useMotionValueEvent(scrollYProgress, "change", (value) => {
+        if (isLoading) return;
 
-            // 1. Dynamic Background gradient
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, `hsl(${220 + progress * 40}, 50%, 10%)`);
-            gradient.addColorStop(1, `hsl(${260 + progress * 40}, 50%, 5%)`);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Map scroll progress (0-1) to frame number (1-240)
+        const frameIndex = Math.min(
+            Math.max(1, Math.floor(value * TOTAL_FRAMES) + 1),
+            TOTAL_FRAMES
+        );
 
-            // 2. Animated Circle (The "Scanning" effect)
-            ctx.beginPath();
-            ctx.arc(
-                canvas.width / 2,
-                canvas.height / 2,
-                200 + Math.sin(progress * 10) * 50,
-                0,
-                Math.PI * 2
-            );
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + progress * 0.5})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // 3. Text Info
-            ctx.font = "100px serif";
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(`Process Phase ${frameIndex}`, canvas.width / 2, canvas.height / 2);
-        };
-
-        // Render loop synced to scroll value (using generic event since motion value pushes updates)
-        // Actually, we need to subscribe to scrollYProgress
-        const unsubscribe = scrollYProgress.on("change", (latest) => {
-            render(latest);
-        });
-
-        // Initial render
-        render(0);
-
-        return () => unsubscribe();
-    }, [scrollYProgress]);
+        if (frameIndex !== currentFrameRef.current) {
+            drawFrame(frameIndex);
+        }
+    });
 
     return (
-        <div ref={containerRef} className="h-[300vh] relative bg-[var(--color-night-deep)]">
-            <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
-                <canvas
-                    ref={canvasRef}
-                    className="w-full h-full object-cover"
-                />
-
-                <div className="absolute bottom-12 left-12 z-10 p-4 bg-black/50 backdrop-blur-md rounded border border-white/10">
-                    <h3 className="text-xs uppercase tracking-widest text-white/60 mb-1">Restoration Log</h3>
-                    <p className="text-sm font-mono text-white">Sequence Active</p>
-                </div>
+        <div ref={containerRef} className="h-[250vh] relative bg-[#2C2826]">
+            <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+                {isLoading ? (
+                    <div className="text-center">
+                        <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-[#B8860B] transition-all duration-200"
+                                style={{ width: `${loadProgress}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-white/50 mt-4 font-mono">
+                            Loading sequence: {loadProgress}%
+                        </p>
+                    </div>
+                ) : (
+                    <canvas
+                        ref={canvasRef}
+                        className="w-full h-full object-contain"
+                    />
+                )}
             </div>
         </div>
     );

@@ -86,44 +86,77 @@ export default function ParallaxHero() {
         []
     );
 
-    // Animation loop
+    // Intersection Observer to pause animation when out of view
     useEffect(() => {
-        let isActive = true;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    isActiveRef.current = true;
+                    if (!rafRef.current) {
+                        rafRef.current = requestAnimationFrame(animate);
+                    }
+                } else {
+                    isActiveRef.current = false;
+                    if (rafRef.current) {
+                        cancelAnimationFrame(rafRef.current);
+                        rafRef.current = null;
+                    }
+                }
+            },
+            { threshold: 0 }
+        );
 
-        const animate = () => {
-            if (!isActive) return;
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
 
-            // Smooth lerping to target position
-            currentRef.current.x = lerp(
-                currentRef.current.x,
-                mouseRef.current.x,
-                LERP_FACTOR
-            );
-            currentRef.current.y = lerp(
-                currentRef.current.y,
-                mouseRef.current.y,
-                LERP_FACTOR
-            );
+        return () => observer.disconnect();
+    }, []);
 
-            // Calculate offsets for each layer based on depth
-            const newOffsets = PARALLAX_LAYERS.map((layer) => ({
-                x: currentRef.current.x * layer.depth * MAX_OFFSET,
-                y: currentRef.current.y * layer.depth * MAX_OFFSET,
-            }));
+    // Animation loop logic extracted for reference
+    const isActiveRef = useRef(false);
+    const animate = useCallback(() => {
+        if (!isActiveRef.current) return;
 
-            setLayerOffsets(newOffsets);
+        // Smooth lerping to target position
+        const dx = mouseRef.current.x - currentRef.current.x;
+        const dy = mouseRef.current.y - currentRef.current.y;
+
+        // Optimization: Stop updating if minimal movement
+        if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
             rafRef.current = requestAnimationFrame(animate);
-        };
+            return;
+        }
 
+        currentRef.current.x = lerp(
+            currentRef.current.x,
+            mouseRef.current.x,
+            LERP_FACTOR
+        );
+        currentRef.current.y = lerp(
+            currentRef.current.y,
+            mouseRef.current.y,
+            LERP_FACTOR
+        );
+
+        // Calculate offsets for each layer based on depth
+        const newOffsets = PARALLAX_LAYERS.map((layer) => ({
+            x: currentRef.current.x * layer.depth * MAX_OFFSET,
+            y: currentRef.current.y * layer.depth * MAX_OFFSET,
+        }));
+
+        setLayerOffsets(newOffsets);
         rafRef.current = requestAnimationFrame(animate);
-
-        return () => {
-            isActive = false;
-            if (rafRef.current) {
-                cancelAnimationFrame(rafRef.current);
-            }
-        };
     }, [lerp]);
+
+    // Initial Kickoff is handled by Observer now
+    // remove separate useEffect for loop
+    useEffect(() => {
+        // Just for type safety regarding generic useEffect return
+        return () => {
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        }
+    }, []);
 
     // Mouse move handler
     useEffect(() => {
@@ -157,7 +190,7 @@ export default function ParallaxHero() {
                 {PARALLAX_LAYERS.map((layer, index) => (
                     <div
                         key={index}
-                        className={`parallax-layer ${layer.isBase ? "parallax-layer--base" : ""} ${isIdle ? "parallax-layer--breathing" : ""}`}
+                        className={`parallax-layer ${layer.isBase ? "parallax-layer--base" : ""} ${isIdle && !layer.isBase ? "parallax-layer--breathing" : ""}`}
                         style={{
                             zIndex: layer.zIndex,
                             transform: layer.isBase
@@ -170,7 +203,7 @@ export default function ParallaxHero() {
                                     right: layer.position.right,
                                     bottom: layer.position.bottom,
                                 }
-                                : {}),
+                                : layer.isBase ? { top: "50%", left: "50%" } : {}),
                             ...(!layer.isBase && layer.size
                                 ? {
                                     width: layer.size.width,
@@ -182,7 +215,7 @@ export default function ParallaxHero() {
                             "--breathe-y": `${layer.depth * 1}px`,
                             "--offset-x": `${layerOffsets[index]?.x ?? 0}px`,
                             "--offset-y": `${layerOffsets[index]?.y ?? 0}px`,
-                        } as React.CSSProperties}
+                        } as any}
                     >
                         {layer.isBase ? (
                             <Image

@@ -3,22 +3,30 @@
 /* ============================================
    ARTURA — Premium Art E-Commerce
    Design System & Global Styles
+   "Gallery Warm" Palette
    ============================================ */
 
 /* Google Fonts - Imported in layout.tsx */
 
 :root {
-  /* Colors - Vibrant Starry Night Theme */
-  --color-night-deep: #1e3a8a;
-  /* Rich Ultramarine */
-  --color-night-blue: #3b82f6;
-  /* Electric Blue */
-  --color-starlight: #fef08a;
-  /* Bright Yellow */
-  --color-moon-gold: #fbbf24;
-  /* Amber Gold */
+  /* Colors - Gallery Warm Palette */
+  --color-cream: #FAF7F2;
+  --color-stone: #E8E4DD;
+  --color-parchment: #F5F1E6;
+  --color-gold: #B8860B;
+  --color-gold-light: #D4A84B;
+  --color-charcoal: #2C2826;
+  --color-charcoal-soft: #4A4543;
+  --color-muted: #6B635A;
   --color-white: #ffffff;
-  --color-white-soft: rgba(255, 255, 255, 0.95);
+  --color-black: #1A1816;
+
+  /* Legacy support */
+  --color-night-deep: #FAF7F2;
+  --color-night-blue: #E8E4DD;
+  --color-starlight: #2C2826;
+  --color-moon-gold: #B8860B;
+  --color-white-soft: rgba(44, 40, 38, 0.8);
 
   /* Parallax Motion Tokens */
   --parallax-max-offset: 30px;
@@ -40,8 +48,8 @@
 }
 
 @theme inline {
-  --color-background: var(--color-night-deep);
-  --color-foreground: var(--color-white);
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-charcoal);
   --font-sans: var(--font-body);
   --font-serif: var(--font-display);
 }
@@ -61,8 +69,8 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: var(--color-night-deep);
-  color: var(--color-white);
+  background: var(--color-cream);
+  color: var(--color-charcoal);
   font-family: var(--font-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -166,8 +174,8 @@ body {
   padding: 4rem;
   pointer-events: none;
   background: linear-gradient(to top,
-      rgba(11, 16, 38, 0.6) 0%,
-      rgba(11, 16, 38, 0.2) 30%,
+      rgba(44, 40, 38, 0.7) 0%,
+      rgba(44, 40, 38, 0.3) 30%,
       transparent 60%);
 }
 
@@ -195,7 +203,7 @@ body {
   font-size: clamp(1rem, 2vw, 1.25rem);
   font-weight: 300;
   letter-spacing: 0.15em;
-  color: var(--color-white-soft);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   opacity: 0.85;
 }
@@ -234,7 +242,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: var(--color-night-deep);
+  background: var(--color-cream);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,7 +259,7 @@ body {
   font-family: var(--font-display);
   font-size: 1.5rem;
   letter-spacing: 0.5em;
-  color: var(--color-white-soft);
+  color: var(--color-charcoal);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -265,4 +273,17 @@ body {
   50% {
     opacity: 1;
   }
+}
+
+/* ============================================
+   Scrollbar Hide Utility
+   ============================================ */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

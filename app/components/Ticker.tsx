@@ -13,7 +13,7 @@ const ITEMS = [
 
 export default function Ticker() {
     return (
-        <div className="bg-amber-400 py-4 overflow-hidden border-y border-black">
+        <div className="bg-[#B8860B] py-4 overflow-hidden border-y border-[#2C2826]/20">
             <motion.div
                 className="flex whitespace-nowrap"
                 animate={{ x: "-50%" }}
@@ -25,10 +25,10 @@ export default function Ticker() {
             >
                 {[...ITEMS, ...ITEMS, ...ITEMS, ...ITEMS].map((item, i) => (
                     <div key={i} className="flex items-center gap-8 mx-8">
-                        <span className="text-black font-mono text-sm uppercase tracking-widest font-bold">
+                        <span className="text-[#2C2826] font-mono text-sm uppercase tracking-widest font-bold">
                             {item}
                         </span>
-                        <span className="w-2 h-2 bg-black rounded-full" />
+                        <span className="w-2 h-2 bg-[#2C2826] rounded-full" />
                     </div>
                 ))}
             </motion.div>

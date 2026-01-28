@@ -10,7 +10,7 @@ import Footer from "./components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-[var(--color-night-deep)] min-h-screen selection:bg-yellow-400/30">
+    <main className="bg-[#FAF7F2] min-h-screen selection:bg-amber-200/50">
       <IntroLoader />
       <Navbar />
       <ParallaxHero />
@@ -23,3 +23,5 @@ export default function Home() {
     </main>
   );
 }
+
+
